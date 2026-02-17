@@ -1,32 +1,24 @@
-                                                                                
+================================================================================
 FREQUENCY ORDERED BIN SEARCH (FOBS) MODEL
-                                                                                
+================================================================================
 
 Loading data...
 Loaded 32342 word instances
 
-                                                                                
+================================================================================
 PART 1: LEMMATIZATION AND FREQUENCY ORDERED BIN SEARCH
-                                                                                
+================================================================================
 
 Lemmatizing words...
 Unique surface forms: 2372
 Unique lemmas: 2238
 
-Lemmatization Examples:
-------------------------------------------------------------
-  If                   -> if
-  North                -> north
-  England,             -> england
-  moors                -> moor
-  as                   -> a
-
 Computing lemma frequencies...
 Computed frequencies for 2238 lemmas
 
-                                                                                
+================================================================================
 CONSTRUCTING FOBS STRUCTURE
-                                                                                
+================================================================================
 
 FOBS Bin Statistics:
 ------------------------------------------------------------
@@ -60,9 +52,9 @@ Bin distribution (Lemma):
   Bin 2 (freq 10^2): 1 lemmas
   Bin 0 (freq 10^0): 86 lemmas
 
-                                                                                
+================================================================================
 HYPOTHESIS 1: Root Frequency vs Surface Frequency
-                                                                                
+================================================================================
 
 Modeling dataset: 32342 words
 
@@ -74,15 +66,6 @@ MAE: 29.4181
 AIC: 334094.1415
 BIC: 334119.2939
 
-Coefficients:
-===============================================================================
-                  coef    std err          t      P>|t|      [0.025      0.975]
--------------------------------------------------------------------------------
-Intercept     321.3850      1.990    161.462      0.000     317.484     325.286
-log_freq       -0.5849      0.200     -2.922      0.003      -0.977      -0.193
-word_length     4.7965      0.118     40.664      0.000       4.565       5.028
-===============================================================================
-
 MODEL 2: Mean RT ~ lemma_freq + lemma_length
 ------------------------------------------------------------
 R² Score: 0.0745
@@ -91,111 +74,64 @@ MAE: 29.5645
 AIC: 334262.3642
 BIC: 334287.5165
 
-Coefficients:
-==================================================================================
-                     coef    std err          t      P>|t|      [0.025      0.975]
-----------------------------------------------------------------------------------
-Intercept        343.4473      1.754    195.858      0.000     340.010     346.884
-log_lemma_freq    -1.9842      0.129    -15.356      0.000      -2.237      -1.731
-lemma_length       3.3162      0.143     23.213      0.000       3.036       3.596
-==================================================================================
-
-                                                            
-MODEL COMPARISON
-                                                            
-Metric               Surface Freq         Lemma Freq           Better Model   
---------------------------------------------------------------------------------
-R²                   0.0793               0.0745               Surface        
-RMSE                 42.3509              42.4611              Surface        
-MAE                  29.4181              29.5645              Surface        
-AIC                  334094.1415          334262.3642          Surface        
-BIC                  334119.2939          334287.5165          Surface        
 CONCLUSION: Surface Frequency is a better predictor of reading time
 
-Visualization saved as 'fobs_hypothesis1.png'
+================================================================================
+HYPOTHESIS 2: Pseudo-Affixes vs Real Affixes (FREQUENCY MATCHED)
+================================================================================
 
-                                                                                
-HYPOTHESIS 2: Pseudo-Affixes vs Real Affixes
-                                                                                
+STEP 1: Finding all -er suffix words in corpus...
+Found 92 unique -er words in corpus
+Frequency range: 0 to 415597541
+Length range: 3 to 12
 
-Searching for -er suffix words in corpus...
-Top 20 -er words in corpus:
-word_clean
-her            309
-other           82
-water           69
-over            62
-however         52
-higher          39
-barber          34
-grandmother     32
-after           27
-mother          24
-another         24
-better          21
-disorder        21
-together        20
-later           17
-longer          16
-buster          12
-trigger         12
-teacher         11
-ever            10
-Name: count, dtype: int64
+STEP 2: Filtering for matched words:
+  Target frequency: 500,000 - 10,000,000
+  Target length: 5 - 7 characters
 
-Test Words:
+28 words match the criteria:
+word_clean    freq  word_length    mean_RT
+     anger  983027            6 340.732311
+    answer 1913421            7 372.297360
+    bigger 3025646            6 305.905882
+    bitter 3179269            6 296.151163
+    butter 2864124            6 297.530864
+    clever 1870677            6 337.178571
+    closer 8390061            6 342.211111
+    corner 8812182            6 316.175824
+      ever 1335046            5 341.507917
+    finger  603297            7 402.425532
+    flower 3495072            6 354.742514
+    higher 2286590            6 340.753540
+    lesser 3073483            6 350.544304
+    master  990335            7 329.681818
+    mother 5261105            7 339.396356
+     refer 8430029            5 315.157895
+    sender  782406            6 347.026667
+     sheer 2071421            5 343.397727
+   shelter 2858728            7 357.293478
+    silver 6488905            6 396.076923
+    sister 9970875            6 332.221622
+    temper 1831950            6 292.819277
+   thunder 1122965            7 326.809524
+   trigger 2343925            7 336.791955
+     water 7651526            6 324.017951
+   weather 6846495            7 328.147610
+   whoever 1317362            7 321.897988
+     wider 4962184            5 302.011494
+
+------------------------------------------------------------
+STEP 3: Manual classification of available words
 ------------------------------------------------------------
 
-Pseudo-Affixed Words (affix-like ending, but not decomposable):
-  finger       = fing + er (NOT fing+er)
-  corner       = corn + er (NOT corn+er)
-  manner       = mann + er (NOT mann+er)
-  never        = nev + er (NOT nev+er)
-  under        = und + er (NOT und+er)
+Pseudo-affixed words available: ['finger', 'corner', 'silver']
+Real affixed words available: []
 
-Real Affixed Words (true morphological decomposition):
-  teacher      = teach + er (= teach+er)
-  farmer       = farm + er (= farm+er)
-  worker       = work + er (= work+er)
-  maker        = make + er (= make+er)
-  keeper       = keep + er (= keep+er)
+✗ Insufficient test words available in corpus
+This is a limitation of using naturalistic corpus data.
 
+FOBS Hypothesis 1 visualization saved
 
-Found 37 instances of test words in corpus
-Pseudo-affixed instances: 22
-Real affixed instances: 15
-
-                                                                                
-DETAILED STATISTICS
-                                                                                
-
-Pseudo-Affixed Words:
-------------------------------------------------------------
-Word         Mean RT      Std RT       Count    Length   Frequency   
---------------------------------------------------------------------------------
-corner       316.18       0.00         3        6        8812182     
-finger       402.43       0.00         4        7        603297      
-never        341.78       16.84        9        5        74546406    
-under        337.75       19.91        6        5        99197859    
-
-Real Affixed Words:
-------------------------------------------------------------
-Word         Mean RT      Std RT       Count    Length   Frequency   
---------------------------------------------------------------------------------
-maker        413.98       0.00         4        6        50713       
-teacher      351.23       23.41        11       8        1731170     
-
-                                                                                
-STATISTICAL TEST: Independent t-test
-                                                                                
-Pseudo-affixed mean RT: 348.22 ms (SD=30.24)
-Real affixed mean RT: 367.96 ms (SD=33.70)
-Difference: -19.75 ms
-
-t-statistic: -1.8102
-p-value: 0.0789
-Result: Not significant (α=0.05)
-
-→ Pseudo-affixed words DO NOT take longer to process (hypothesis NOT SUPPORTED)
-
-Visualization saved as 'fobs_hypothesis2_affixes.png'
+================================================================================
+FOBS ANALYSIS COMPLETE
+================================================================================

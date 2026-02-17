@@ -175,7 +175,7 @@ print("=" * 80)
 model_data = merged_data.dropna(subset=['log_freq', 'log_lemma_freq', 'word_length', 'lemma_length'])
 print(f"\nModeling dataset: {len(model_data)} words")
 
-# Model 1
+# Model 1: Surface
 X1 = model_data[['log_freq', 'word_length']].values
 y = model_data['mean_RT'].values
 
@@ -198,7 +198,7 @@ print(f"MAE: {mae_1:.4f}")
 print(f"AIC: {sm_model1.aic:.4f}")
 print(f"BIC: {sm_model1.bic:.4f}")
 
-# Model 2
+# Model 2: Lemma
 X2 = model_data[['log_lemma_freq', 'lemma_length']].values
 
 model2 = LinearRegression()
@@ -225,142 +225,310 @@ print(f"\nCONCLUSION: {better} is a better predictor of reading time")
 
 # Hypothesis 2: Pseudo vs Real Affixes - FIXED VERSION
 print("\n" + "=" * 80)
-print("HYPOTHESIS 2: Pseudo-Affixes vs Real Affixes")
+print("HYPOTHESIS 2: Pseudo-Affixes vs Real Affixes (FREQUENCY MATCHED)")
 print("=" * 80)
 
-# First, check what -er words exist in corpus
-print("\nChecking available -er suffix words in corpus...")
-er_words_in_corpus = merged_data[merged_data['word_clean'].str.endswith('er')]['word_clean'].unique()
-print(f"Found {len(er_words_in_corpus)} unique -er words")
-print("Sample:", list(er_words_in_corpus[:20]))
+# STEP 1: Find all -er words in corpus with their stats
+print("\nSTEP 1: Finding all -er suffix words in corpus...")
+er_candidates = merged_data[merged_data['word_clean'].str.endswith('er')].copy()
 
-# Use words that are more likely to exist in narrative text
-pseudo_affixed = {
-    'finger': {'base': 'fing', 'affix': 'er', 'type': 'pseudo'},
-    'corner': {'base': 'corn', 'affix': 'er', 'type': 'pseudo'},
-    'manner': {'base': 'mann', 'affix': 'er', 'type': 'pseudo'},
-    'never': {'base': 'nev', 'affix': 'er', 'type': 'pseudo'},
-    'under': {'base': 'und', 'affix': 'er', 'type': 'pseudo'}
-}
+# Aggregate stats per unique word
+er_stats = er_candidates.groupby('word_clean').agg({
+    'mean_RT': 'mean',
+    'freq': 'first',
+    'word_length': 'first'
+}).reset_index()
 
-real_affixed = {
-    'teacher': {'base': 'teach', 'affix': 'er', 'type': 'real'},
-    'farmer': {'base': 'farm', 'affix': 'er', 'type': 'real'},
-    'father': {'base': 'fath', 'affix': 'er', 'type': 'real'},  # Note: not truly affixed but common
-    'mother': {'base': 'moth', 'affix': 'er', 'type': 'real'},  # Note: not truly affixed but common
-    'brother': {'base': 'broth', 'affix': 'er', 'type': 'real'}  # Note: not truly affixed but common
-}
+print(f"Found {len(er_stats)} unique -er words in corpus")
+print(f"Frequency range: {er_stats['freq'].min():.0f} to {er_stats['freq'].max():.0f}")
+print(f"Length range: {er_stats['word_length'].min()} to {er_stats['word_length'].max()}")
 
-# Alternative: use -ing pseudo vs real if -er doesn't work
-pseudo_affixed_ing = {
-    'thing': {'base': 'th', 'affix': 'ing', 'type': 'pseudo'},
-    'nothing': {'base': 'noth', 'affix': 'ing', 'type': 'pseudo'},
-    'something': {'base': 'someth', 'affix': 'ing', 'type': 'pseudo'},
-    'anything': {'base': 'anyth', 'affix': 'ing', 'type': 'pseudo'},
-    'everything': {'base': 'everyth', 'affix': 'ing', 'type': 'pseudo'}
-}
+# STEP 2: Define target frequency and length ranges
+TARGET_FREQ_MIN = 500_000      # 500k
+TARGET_FREQ_MAX = 10_000_000   # 10M
+TARGET_LENGTH_MIN = 5
+TARGET_LENGTH_MAX = 7
 
-real_affixed_ing = {
-    'running': {'base': 'run', 'affix': 'ning', 'type': 'real'},
-    'walking': {'base': 'walk', 'affix': 'ing', 'type': 'real'},
-    'looking': {'base': 'look', 'affix': 'ing', 'type': 'real'},
-    'thinking': {'base': 'think', 'affix': 'ing', 'type': 'real'},
-    'going': {'base': 'go', 'affix': 'ing', 'type': 'real'}
-}
+print(f"\nSTEP 2: Filtering for matched words:")
+print(f"  Target frequency: {TARGET_FREQ_MIN:,} - {TARGET_FREQ_MAX:,}")
+print(f"  Target length: {TARGET_LENGTH_MIN} - {TARGET_LENGTH_MAX} characters")
 
-print("\nTest Words:")
+er_filtered = er_stats[
+    (er_stats['freq'] >= TARGET_FREQ_MIN) &
+    (er_stats['freq'] <= TARGET_FREQ_MAX) &
+    (er_stats['word_length'] >= TARGET_LENGTH_MIN) &
+    (er_stats['word_length'] <= TARGET_LENGTH_MAX)
+].copy()
+
+print(f"\n{len(er_filtered)} words match the criteria:")
+print(er_filtered[['word_clean', 'freq', 'word_length', 'mean_RT']].to_string(index=False))
+
+# STEP 3: Manually classify available words
+print("\n" + "-" * 60)
+print("STEP 3: Manual classification of available words")
 print("-" * 60)
-print("\nPseudo-Affixed Words:")
-for word in pseudo_affixed.keys():
-    exists = "✓" if word in er_words_in_corpus else "✗"
-    print(f"  {word:<15} {exists}")
 
-print("\nReal Affixed Words:")
-for word in real_affixed.keys():
-    exists = "✓" if word in er_words_in_corpus else "✗"
-    print(f"  {word:<15} {exists}")
+# Pseudo-affixed: -er is NOT a suffix (non-decomposable)
+pseudo_candidates = ['finger', 'under', 'never', 'corner', 'manner', 'umber', 'inner', 'outer', 
+                     'dinner', 'winter', 'summer', 'silver', 'proper', 'river', 'offer']
 
-# Use the set that has more words
-test_words_er = list(pseudo_affixed.keys()) + list(real_affixed.keys())
-test_words_ing = list(pseudo_affixed_ing.keys()) + list(real_affixed_ing.keys())
+# Real affixed: -er IS a suffix (verb -> noun conversion)
+real_candidates = ['teacher', 'farmer', 'worker', 'writer', 'speaker', 'maker', 'player',
+                   'owner', 'buyer', 'seller', 'runner', 'helper', 'lover', 'killer']
 
-test_data_er = merged_data[merged_data['word_clean'].isin([w.lower() for w in test_words_er])].copy()
-test_data_ing = merged_data[merged_data['word_clean'].isin([w.lower() for w in test_words_ing])].copy()
+# Find which candidates exist in our filtered dataset
+available_words = set(er_filtered['word_clean'].tolist())
 
-if len(test_data_er) > len(test_data_ing):
-    test_data = test_data_er
-    pseudo_dict = pseudo_affixed
-    real_dict = real_affixed
-    suffix = "-er"
-else:
-    test_data = test_data_ing
-    pseudo_dict = pseudo_affixed_ing
-    real_dict = real_affixed_ing
-    suffix = "-ing"
+pseudo_available = [w for w in pseudo_candidates if w in available_words]
+real_available = [w for w in real_candidates if w in available_words]
 
-def classify_affix(word):
-    word_lower = word.lower()
-    if word_lower in [w.lower() for w in pseudo_dict.keys()]:
-        return 'pseudo'
-    elif word_lower in [w.lower() for w in real_dict.keys()]:
-        return 'real'
-    return None
+print(f"\nPseudo-affixed words available: {pseudo_available}")
+print(f"Real affixed words available: {real_available}")
 
-test_data['affix_type'] = test_data['word_clean'].apply(classify_affix)
-test_data = test_data.dropna(subset=['affix_type'])
-
-print(f"\n\nUsing {suffix} suffix words")
-print(f"Found {len(test_data)} instances of test words in corpus")
-print(f"Pseudo-affixed instances: {(test_data['affix_type'] == 'pseudo').sum()}")
-print(f"Real affixed instances: {(test_data['affix_type'] == 'real').sum()}")
-
-if len(test_data) > 0 and (test_data['affix_type'] == 'real').sum() > 0:
-    # Continue with analysis...
-    pseudo_stats = test_data[test_data['affix_type'] == 'pseudo'].groupby('word_clean').agg({
-        'mean_RT': ['mean', 'std', 'count'],
-        'word_length': 'first',
-        'freq': 'first'
-    }).reset_index()
+# If we have at least 3 of each, proceed
+if len(pseudo_available) >= 3 and len(real_available) >= 3:
+    # Further match frequencies between groups
+    pseudo_df = er_filtered[er_filtered['word_clean'].isin(pseudo_available)]
+    real_df = er_filtered[er_filtered['word_clean'].isin(real_available)]
     
-    real_stats = test_data[test_data['affix_type'] == 'real'].groupby('word_clean').agg({
-        'mean_RT': ['mean', 'std', 'count'],
-        'word_length': 'first',
-        'freq': 'first'
-    }).reset_index()
+    # Find frequency overlap
+    pseudo_freq_range = (pseudo_df['freq'].min(), pseudo_df['freq'].max())
+    real_freq_range = (real_df['freq'].min(), real_df['freq'].max())
     
-    pseudo_stats.columns = ['word', 'mean_RT', 'std_RT', 'count', 'length', 'freq']
-    real_stats.columns = ['word', 'mean_RT', 'std_RT', 'count', 'length', 'freq']
+    overlap_min = max(pseudo_freq_range[0], real_freq_range[0])
+    overlap_max = min(pseudo_freq_range[1], real_freq_range[1])
     
-    print("\n" + "=" * 80)
-    print("DETAILED STATISTICS")
-    print("=" * 80)
+    print(f"\nFrequency overlap: {overlap_min:.0f} - {overlap_max:.0f}")
     
-    print("\nPseudo-Affixed Words:")
-    print("-" * 60)
-    for _, row in pseudo_stats.iterrows():
-        print(f"{row['word']:<12} {row['mean_RT']:<12.2f} {row['std_RT']:<12.2f} "
-              f"{int(row['count']):<8} {int(row['length']):<8} {int(row['freq']):<12}")
+    # Select words within overlap
+    pseudo_final = pseudo_df[
+        (pseudo_df['freq'] >= overlap_min) & (pseudo_df['freq'] <= overlap_max)
+    ].copy()
+    real_final = real_df[
+        (real_df['freq'] >= overlap_min) & (real_df['freq'] <= overlap_max)
+    ].copy()
     
-    print("\nReal Affixed Words:")
-    print("-" * 60)
-    for _, row in real_stats.iterrows():
-        print(f"{row['word']:<12} {row['mean_RT']:<12.2f} {row['std_RT']:<12.2f} "
-              f"{int(row['count']):<8} {int(row['length']):<8} {int(row['freq']):<12}")
+    print(f"\nFinal selection:")
+    print(f"  Pseudo: {len(pseudo_final)} words")
+    print(f"  Real: {len(real_final)} words")
     
-    # Statistical test
-    pseudo_rts = test_data[test_data['affix_type'] == 'pseudo']['mean_RT'].values
-    real_rts = test_data[test_data['affix_type'] == 'real']['mean_RT'].values
-    
-    if len(pseudo_rts) > 1 and len(real_rts) > 1:
+    if len(pseudo_final) >= 2 and len(real_final) >= 2:
+        # Create classification dictionary
+        pseudo_affixed = {row['word_clean']: {'base': row['word_clean'][:-2], 'affix': 'er', 'type': 'pseudo'}
+                          for _, row in pseudo_final.iterrows()}
+        real_affixed = {row['word_clean']: {'base': row['word_clean'][:-2], 'affix': 'er', 'type': 'real'}
+                        for _, row in real_final.iterrows()}
+        
+        test_words = list(pseudo_affixed.keys()) + list(real_affixed.keys())
+        
+        # Get RT data for these words
+        test_data = merged_data[merged_data['word_clean'].isin(test_words)].copy()
+        
+        def classify_affix(word):
+            if word in pseudo_affixed:
+                return 'pseudo'
+            elif word in real_affixed:
+                return 'real'
+            return None
+        
+        test_data['affix_type'] = test_data['word_clean'].apply(classify_affix)
+        test_data = test_data.dropna(subset=['affix_type'])
+        
+        print("\n" + "=" * 80)
+        print("DETAILED STATISTICS")
+        print("=" * 80)
+        
+        # Aggregate by word
+        pseudo_stats = test_data[test_data['affix_type'] == 'pseudo'].groupby('word_clean').agg({
+            'mean_RT': ['mean', 'std', 'count'],
+            'word_length': 'first',
+            'freq': 'first'
+        }).reset_index()
+        pseudo_stats.columns = ['word', 'mean_RT', 'std_RT', 'count', 'length', 'freq']
+        
+        real_stats = test_data[test_data['affix_type'] == 'real'].groupby('word_clean').agg({
+            'mean_RT': ['mean', 'std', 'count'],
+            'word_length': 'first',
+            'freq': 'first'
+        }).reset_index()
+        real_stats.columns = ['word', 'mean_RT', 'std_RT', 'count', 'length', 'freq']
+        
+        print("\nPseudo-Affixed Words:")
+        print("-" * 80)
+        print(f"{'Word':<15} {'Mean RT':<12} {'Std RT':<12} {'Count':<8} {'Length':<8} {'Frequency':<12}")
+        print("-" * 80)
+        for _, row in pseudo_stats.iterrows():
+            print(f"{row['word']:<15} {row['mean_RT']:<12.2f} {row['std_RT']:<12.2f} "
+                  f"{int(row['count']):<8} {int(row['length']):<8} {int(row['freq']):<12}")
+        
+        print(f"\nMean: {pseudo_stats['mean_RT'].mean():.2f} ms")
+        print(f"Frequency range: {pseudo_stats['freq'].min():.0f} - {pseudo_stats['freq'].max():.0f}")
+        
+        print("\nReal Affixed Words:")
+        print("-" * 80)
+        print(f"{'Word':<15} {'Mean RT':<12} {'Std RT':<12} {'Count':<8} {'Length':<8} {'Frequency':<12}")
+        print("-" * 80)
+        for _, row in real_stats.iterrows():
+            print(f"{row['word']:<15} {row['mean_RT']:<12.2f} {row['std_RT']:<12.2f} "
+                  f"{int(row['count']):<8} {int(row['length']):<8} {int(row['freq']):<12}")
+        
+        print(f"\nMean: {real_stats['mean_RT'].mean():.2f} ms")
+        print(f"Frequency range: {real_stats['freq'].min():.0f} - {real_stats['freq'].max():.0f}")
+        
+        # Statistical test
+        pseudo_rts = test_data[test_data['affix_type'] == 'pseudo']['mean_RT'].values
+        real_rts = test_data[test_data['affix_type'] == 'real']['mean_RT'].values
+        
         t_stat, p_value = ttest_ind(pseudo_rts, real_rts)
+        
         print("\n" + "=" * 80)
         print("STATISTICAL TEST")
         print("=" * 80)
-        print(f"Pseudo: {np.mean(pseudo_rts):.2f} ms (SD={np.std(pseudo_rts):.2f})")
-        print(f"Real: {np.mean(real_rts):.2f} ms (SD={np.std(real_rts):.2f})")
-        print(f"t={t_stat:.4f}, p={p_value:.4f}")
-        print(f"Result: {'Significant' if p_value < 0.05 else 'Not significant'}")
+        print(f"Pseudo-affixed: n={len(pseudo_rts)}, mean={np.mean(pseudo_rts):.2f} ms, SD={np.std(pseudo_rts):.2f}")
+        print(f"Real affixed:   n={len(real_rts)}, mean={np.mean(real_rts):.2f} ms, SD={np.std(real_rts):.2f}")
+        print(f"\nt-statistic: {t_stat:.4f}")
+        print(f"p-value: {p_value:.4f}")
+        print(f"\nResult: {'SIGNIFICANT' if p_value < 0.05 else 'NOT SIGNIFICANT'} at α=0.05")
+        
+        if p_value < 0.05:
+            if np.mean(pseudo_rts) > np.mean(real_rts):
+                print("Conclusion: Pseudo-affixed words take LONGER to process")
+            else:
+                print("Conclusion: Real affixed words take LONGER to process")
+        else:
+            print("Conclusion: No significant difference in processing time")
+        
+        # Visualization
+        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        
+        # Box plot
+        axes[0, 0].boxplot([pseudo_rts, real_rts], labels=['Pseudo-Affixed', 'Real Affixed'])
+        axes[0, 0].set_ylabel('Mean RT (ms)', fontsize=11)
+        axes[0, 0].set_title(f'Reading Time Comparison\nPseudo vs Real Affixes\np = {p_value:.4f}', 
+                             fontsize=12, fontweight='bold')
+        axes[0, 0].grid(True, alpha=0.3)
+        
+        # Violin plot
+        parts = axes[0, 1].violinplot([pseudo_rts, real_rts], positions=[1, 2], 
+                                      showmeans=True, showmedians=True)
+        axes[0, 1].set_xticks([1, 2])
+        axes[0, 1].set_xticklabels(['Pseudo-Affixed', 'Real Affixed'])
+        axes[0, 1].set_ylabel('Mean RT (ms)', fontsize=11)
+        axes[0, 1].set_title('Distribution Comparison', fontsize=12, fontweight='bold')
+        axes[0, 1].grid(True, alpha=0.3)
+        
+        # Individual word RTs
+        x_pseudo = list(range(len(pseudo_stats)))
+        x_real = list(range(len(real_stats)))
+        
+        axes[1, 0].bar(x_pseudo, pseudo_stats['mean_RT'], color='coral', alpha=0.7, 
+                       label=f'Pseudo mean: {pseudo_stats["mean_RT"].mean():.1f}ms')
+        axes[1, 0].bar([x + len(pseudo_stats) + 1 for x in x_real], real_stats['mean_RT'], 
+                       color='skyblue', alpha=0.7, label=f'Real mean: {real_stats["mean_RT"].mean():.1f}ms')
+        axes[1, 0].axhline(pseudo_stats['mean_RT'].mean(), color='red', linestyle='--', alpha=0.7)
+        axes[1, 0].axhline(real_stats['mean_RT'].mean(), color='blue', linestyle='--', alpha=0.7)
+        axes[1, 0].set_xticks(list(range(len(pseudo_stats))) + 
+                              [x + len(pseudo_stats) + 1 for x in range(len(real_stats))])
+        axes[1, 0].set_xticklabels(list(pseudo_stats['word']) + list(real_stats['word']), 
+                                   rotation=45, ha='right')
+        axes[1, 0].set_ylabel('Mean RT (ms)', fontsize=11)
+        axes[1, 0].set_title('Individual Word Reading Times', fontsize=12, fontweight='bold')
+        axes[1, 0].legend()
+        axes[1, 0].grid(True, alpha=0.3, axis='y')
+        
+        # Frequency effect
+        axes[1, 1].scatter(np.log10(pseudo_stats['freq']), pseudo_stats['mean_RT'], 
+                          color='coral', s=100, alpha=0.7, label='Pseudo-Affixed')
+        axes[1, 1].scatter(np.log10(real_stats['freq']), real_stats['mean_RT'], 
+                          color='skyblue', s=100, alpha=0.7, label='Real Affixed')
+        axes[1, 1].set_xlabel('Log Frequency', fontsize=11)
+        axes[1, 1].set_ylabel('Mean RT (ms)', fontsize=11)
+        axes[1, 1].set_title('Frequency Effect by Affix Type', fontsize=12, fontweight='bold')
+        axes[1, 1].legend()
+        axes[1, 1].grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig('fobs_hypothesis2_affixes.png', dpi=300, bbox_inches='tight')
+        print("\nVisualization saved as 'fobs_hypothesis2_affixes.png'")
+        plt.close()
+        
+    else:
+        print("\n✗ Insufficient frequency-matched words found")
 else:
-    print("\n⚠ WARNING: Insufficient data for affixed word analysis")
-    print("The chosen test words do not appear in the Natural Stories corpus.")
-    print("This is expected - literary texts may not contain all word types.")
+    print("\n✗ Insufficient test words available in corpus")
+    print("This is a limitation of using naturalistic corpus data.")
+
+# FOBS Hypothesis 1 visualization
+fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+
+# Surface frequency vs RT
+axes[0, 0].scatter(model_data['log_freq'], model_data['mean_RT'], alpha=0.5, s=20)
+z = np.polyfit(model_data['log_freq'], model_data['mean_RT'], 1)
+p = np.poly1d(z)
+axes[0, 0].plot(sorted(model_data['log_freq']), p(sorted(model_data['log_freq'])), "r--", lw=2)
+axes[0, 0].set_xlabel('Log Surface Frequency', fontsize=11)
+axes[0, 0].set_ylabel('Mean RT (ms)', fontsize=11)
+axes[0, 0].set_title('Surface Frequency vs RT', fontsize=12, fontweight='bold')
+axes[0, 0].grid(True, alpha=0.3)
+
+# Lemma frequency vs RT
+axes[0, 1].scatter(model_data['log_lemma_freq'], model_data['mean_RT'], alpha=0.5, s=20)
+z = np.polyfit(model_data['log_lemma_freq'], model_data['mean_RT'], 1)
+p = np.poly1d(z)
+axes[0, 1].plot(sorted(model_data['log_lemma_freq']), p(sorted(model_data['log_lemma_freq'])), "r--", lw=2)
+axes[0, 1].set_xlabel('Log Lemma Frequency', fontsize=11)
+axes[0, 1].set_ylabel('Mean RT (ms)', fontsize=11)
+axes[0, 1].set_title('Lemma Frequency vs RT', fontsize=12, fontweight='bold')
+axes[0, 1].grid(True, alpha=0.3)
+
+# Model comparison
+models = ['Surface', 'Lemma']
+r2_scores = [r2_1, r2_2]
+rmse_scores = [rmse_1, rmse_2]
+mae_scores = [mae_1, mae_2]
+
+x_pos = np.arange(len(models))
+width = 0.25
+
+axes[1, 0].bar(x_pos - width, r2_scores, width, label='R²', color='steelblue')
+axes[1, 0].bar(x_pos, [r/10 for r in rmse_scores], width, label='RMSE/10', color='coral')
+axes[1, 0].bar(x_pos + width, [m/10 for m in mae_scores], width, label='MAE/10', color='lightgreen')
+axes[1, 0].set_ylabel('Score', fontsize=11)
+axes[1, 0].set_title('Model Comparison', fontsize=12, fontweight='bold')
+axes[1, 0].set_xticks(x_pos)
+axes[1, 0].set_xticklabels(models)
+axes[1, 0].legend()
+axes[1, 0].grid(True, alpha=0.3, axis='y')
+
+# FOBS search depth correlation
+depth_data = model_data.dropna(subset=['word_search_depth', 'lemma_search_depth'])
+
+if len(depth_data) > 0:
+    corr_word_depth = pearsonr(depth_data['word_search_depth'], depth_data['mean_RT'])
+    corr_lemma_depth = pearsonr(depth_data['lemma_search_depth'], depth_data['mean_RT'])
+    
+    x_pos = [0, 1]
+    correlations = [abs(corr_word_depth[0]), abs(corr_lemma_depth[0])]
+    p_values = [corr_word_depth[1], corr_lemma_depth[1]]
+    
+    bars = axes[1, 1].bar(x_pos, correlations, color=['steelblue', 'coral'])
+    axes[1, 1].set_ylabel('|Correlation with RT|', fontsize=11)
+    axes[1, 1].set_title('FOBS Search Depth Correlation', fontsize=12, fontweight='bold')
+    axes[1, 1].set_xticks(x_pos)
+    axes[1, 1].set_xticklabels(['Word\nSearch Depth', 'Lemma\nSearch Depth'])
+    axes[1, 1].grid(True, alpha=0.3, axis='y')
+    
+    for i, (bar, corr, pval) in enumerate(zip(bars, correlations, p_values)):
+        height = bar.get_height()
+        axes[1, 1].text(bar.get_x() + bar.get_width()/2., height,
+                       f'{corr:.3f}\n(p={pval:.0e})',
+                       ha='center', va='bottom', fontsize=9, fontweight='bold')
+
+plt.tight_layout()
+plt.savefig('fobs_hypothesis1.png', dpi=300, bbox_inches='tight')
+print("\nFOBS Hypothesis 1 visualization saved")
+plt.close()
+
+print("\n" + "=" * 80)
+print("FOBS ANALYSIS COMPLETE")
+print("=" * 80)
