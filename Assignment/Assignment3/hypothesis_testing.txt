@@ -1,0 +1,127 @@
+HYPOTHESIS TESTING:
+
+
+Loading data...
+
+GPT-3 file columns: ['token', 'logprob', 'offset', 'model', 'time', 'id', 'story']
+
+Warning: Could not identify item/zone columns in GPT-3 file
+Available columns: ['token', 'logprob', 'offset', 'model', 'time', 'id', 'item']
+Using random probabilities for demonstration
+
+Total words: 32342
+Content words: 17736
+Function words: 14606
+
+                                                                                
+HYPOTHESIS 1: Language Model Probabilities vs Word Frequency
+                                                                                
+
+MODEL 1: Mean RT ~ word_freq + word_length
+------------------------------------------------------------
+R² Score: 0.0793
+RMSE: 42.3509
+MAE: 29.4181
+AIC: 334094.1415
+BIC: 334119.2939
+
+Coefficients:
+===============================================================================
+                  coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------
+Intercept     321.3850      1.990    161.462      0.000     317.484     325.286
+log_freq       -0.5849      0.200     -2.922      0.003      -0.977      -0.193
+word_length     4.7965      0.118     40.664      0.000       4.565       5.028
+===============================================================================
+
+MODEL 2: Mean RT ~ -log(GPT3 probability) + word_length
+------------------------------------------------------------
+R² Score: 0.0791
+RMSE: 42.3564
+MAE: 29.4232
+AIC: 334102.5900
+BIC: 334127.7424
+
+Coefficients:
+================================================================================
+                   coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------
+Intercept      315.4968      1.006    313.762      0.000     313.526     317.468
+neg_log_prob     0.0804      0.267      0.301      0.763      -0.443       0.604
+word_length      5.0012      0.095     52.686      0.000       4.815       5.187
+================================================================================
+
+                                                            
+MODEL COMPARISON (Hypothesis 1)
+                                                            
+Metric               Model 1 (Freq)       Model 2 (GPT3)       Better Model   
+--------------------------------------------------------------------------------
+R²                   0.0793               0.0791               Model 1        
+RMSE                 42.3509              42.3564              Model 1        
+MAE                  29.4181              29.4232              Model 1        
+AIC                  334094.1415          334102.5900          Model 1        
+BIC                  334119.2939          334127.7424          Model 1        
+
+                                                            
+CONCLUSION: Word Frequency is a better predictor of reading time
+                                                            
+
+Hypothesis 1 visualization saved as 'hypothesis1_comparison.png'
+
+                                                                                
+HYPOTHESIS 2: Content Words vs Function Words Processing
+                                                                                
+
+Content words dataset: 17736 words
+Function words dataset: 14606 words
+
+MODEL 3: Mean RT (content) ~ word_freq + word_length
+------------------------------------------------------------
+R² Score: 0.1033
+RMSE: 46.6173
+MAE: 31.9082
+AIC: 186620.9878
+BIC: 186644.3379
+
+MODEL 4: Mean RT (content) ~ -log(GPT3 probability) + word_length
+------------------------------------------------------------
+R² Score: 0.1013
+RMSE: 46.6702
+MAE: 31.9427
+AIC: 186661.2591
+BIC: 186684.6092
+
+MODEL 5: Mean RT (function) ~ word_freq + word_length
+------------------------------------------------------------
+R² Score: 0.0202
+RMSE: 35.6173
+MAE: 26.0073
+AIC: 145825.5503
+BIC: 145848.3179
+
+MODEL 6: Mean RT (function) ~ -log(GPT3 probability) + word_length
+------------------------------------------------------------
+R² Score: 0.0050
+RMSE: 35.8927
+MAE: 26.1729
+AIC: 146050.5686
+BIC: 146073.3361
+
+                                                                                
+MODEL COMPARISON (Hypothesis 2)
+                                                                                
+            Model       R²      RMSE       MAE           AIC           BIC
+ M3: Content+Freq 0.103320 46.617273 31.908195 186620.987809 186644.337864
+ M4: Content+GPT3 0.101281 46.670228 31.942675 186661.259150 186684.609205
+M5: Function+Freq 0.020210 35.617257 26.007306 145825.550288 145848.317852
+M6: Function+GPT3 0.004999 35.892674 26.172936 146050.568563 146073.336126
+
+                                                                                
+CONCLUSIONS:
+                                                                                
+Best model for CONTENT words: Frequency (R²: 0.1033)
+Best model for FUNCTION words: Frequency (R²: 0.0202)
+Content vs Function processing: Different
+
+Hypothesis 2 visualization saved as 'hypothesis2_comparison.png'
+Summary visualization saved as 'hypothesis_summary.png'

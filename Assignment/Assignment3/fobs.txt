@@ -1,0 +1,201 @@
+                                                                                
+FREQUENCY ORDERED BIN SEARCH (FOBS) MODEL
+                                                                                
+
+Loading data...
+Loaded 32342 word instances
+
+                                                                                
+PART 1: LEMMATIZATION AND FREQUENCY ORDERED BIN SEARCH
+                                                                                
+
+Lemmatizing words...
+Unique surface forms: 2372
+Unique lemmas: 2238
+
+Lemmatization Examples:
+------------------------------------------------------------
+  If                   -> if
+  North                -> north
+  England,             -> england
+  moors                -> moor
+  as                   -> a
+
+Computing lemma frequencies...
+Computed frequencies for 2238 lemmas
+
+                                                                                
+CONSTRUCTING FOBS STRUCTURE
+                                                                                
+
+FOBS Bin Statistics:
+------------------------------------------------------------
+Word bins: 10
+Lemma bins: 13
+
+Bin distribution (Word):
+  Bin 10 (freq 10^10): 254 words
+  Bin 9 (freq 10^9): 199 words
+  Bin 8 (freq 10^8): 160 words
+  Bin 7 (freq 10^7): 638 words
+  Bin 6 (freq 10^6): 752 words
+  Bin 5 (freq 10^5): 311 words
+  Bin 4 (freq 10^4): 46 words
+  Bin 3 (freq 10^3): 9 words
+  Bin 1 (freq 10^1): 1 words
+  Bin 0 (freq 10^0): 2 words
+
+Bin distribution (Lemma):
+  Bin 13 (freq 10^13): 1 lemmas
+  Bin 12 (freq 10^12): 5 lemmas
+  Bin 11 (freq 10^11): 16 lemmas
+  Bin 10 (freq 10^10): 40 lemmas
+  Bin 9 (freq 10^9): 116 lemmas
+  Bin 8 (freq 10^8): 381 lemmas
+  Bin 7 (freq 10^7): 819 lemmas
+  Bin 6 (freq 10^6): 550 lemmas
+  Bin 5 (freq 10^5): 195 lemmas
+  Bin 4 (freq 10^4): 23 lemmas
+  Bin 3 (freq 10^3): 5 lemmas
+  Bin 2 (freq 10^2): 1 lemmas
+  Bin 0 (freq 10^0): 86 lemmas
+
+                                                                                
+HYPOTHESIS 1: Root Frequency vs Surface Frequency
+                                                                                
+
+Modeling dataset: 32342 words
+
+MODEL 1: Mean RT ~ surface_freq + surface_length
+------------------------------------------------------------
+R² Score: 0.0793
+RMSE: 42.3509
+MAE: 29.4181
+AIC: 334094.1415
+BIC: 334119.2939
+
+Coefficients:
+===============================================================================
+                  coef    std err          t      P>|t|      [0.025      0.975]
+-------------------------------------------------------------------------------
+Intercept     321.3850      1.990    161.462      0.000     317.484     325.286
+log_freq       -0.5849      0.200     -2.922      0.003      -0.977      -0.193
+word_length     4.7965      0.118     40.664      0.000       4.565       5.028
+===============================================================================
+
+MODEL 2: Mean RT ~ lemma_freq + lemma_length
+------------------------------------------------------------
+R² Score: 0.0745
+RMSE: 42.4611
+MAE: 29.5645
+AIC: 334262.3642
+BIC: 334287.5165
+
+Coefficients:
+==================================================================================
+                     coef    std err          t      P>|t|      [0.025      0.975]
+----------------------------------------------------------------------------------
+Intercept        343.4473      1.754    195.858      0.000     340.010     346.884
+log_lemma_freq    -1.9842      0.129    -15.356      0.000      -2.237      -1.731
+lemma_length       3.3162      0.143     23.213      0.000       3.036       3.596
+==================================================================================
+
+                                                            
+MODEL COMPARISON
+                                                            
+Metric               Surface Freq         Lemma Freq           Better Model   
+--------------------------------------------------------------------------------
+R²                   0.0793               0.0745               Surface        
+RMSE                 42.3509              42.4611              Surface        
+MAE                  29.4181              29.5645              Surface        
+AIC                  334094.1415          334262.3642          Surface        
+BIC                  334119.2939          334287.5165          Surface        
+CONCLUSION: Surface Frequency is a better predictor of reading time
+
+Visualization saved as 'fobs_hypothesis1.png'
+
+                                                                                
+HYPOTHESIS 2: Pseudo-Affixes vs Real Affixes
+                                                                                
+
+Searching for -er suffix words in corpus...
+Top 20 -er words in corpus:
+word_clean
+her            309
+other           82
+water           69
+over            62
+however         52
+higher          39
+barber          34
+grandmother     32
+after           27
+mother          24
+another         24
+better          21
+disorder        21
+together        20
+later           17
+longer          16
+buster          12
+trigger         12
+teacher         11
+ever            10
+Name: count, dtype: int64
+
+Test Words:
+------------------------------------------------------------
+
+Pseudo-Affixed Words (affix-like ending, but not decomposable):
+  finger       = fing + er (NOT fing+er)
+  corner       = corn + er (NOT corn+er)
+  manner       = mann + er (NOT mann+er)
+  never        = nev + er (NOT nev+er)
+  under        = und + er (NOT und+er)
+
+Real Affixed Words (true morphological decomposition):
+  teacher      = teach + er (= teach+er)
+  farmer       = farm + er (= farm+er)
+  worker       = work + er (= work+er)
+  maker        = make + er (= make+er)
+  keeper       = keep + er (= keep+er)
+
+
+Found 37 instances of test words in corpus
+Pseudo-affixed instances: 22
+Real affixed instances: 15
+
+                                                                                
+DETAILED STATISTICS
+                                                                                
+
+Pseudo-Affixed Words:
+------------------------------------------------------------
+Word         Mean RT      Std RT       Count    Length   Frequency   
+--------------------------------------------------------------------------------
+corner       316.18       0.00         3        6        8812182     
+finger       402.43       0.00         4        7        603297      
+never        341.78       16.84        9        5        74546406    
+under        337.75       19.91        6        5        99197859    
+
+Real Affixed Words:
+------------------------------------------------------------
+Word         Mean RT      Std RT       Count    Length   Frequency   
+--------------------------------------------------------------------------------
+maker        413.98       0.00         4        6        50713       
+teacher      351.23       23.41        11       8        1731170     
+
+                                                                                
+STATISTICAL TEST: Independent t-test
+                                                                                
+Pseudo-affixed mean RT: 348.22 ms (SD=30.24)
+Real affixed mean RT: 367.96 ms (SD=33.70)
+Difference: -19.75 ms
+
+t-statistic: -1.8102
+p-value: 0.0789
+Result: Not significant (α=0.05)
+
+→ Pseudo-affixed words DO NOT take longer to process (hypothesis NOT SUPPORTED)
+
+Visualization saved as 'fobs_hypothesis2_affixes.png'

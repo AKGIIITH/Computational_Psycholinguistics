@@ -1,0 +1,61 @@
+Loading data...
+Loaded 848875 RT records and 32342 frequency records
+
+TASK 1: Computing mean RT per word
+Computed mean RT for 10256 unique word instances
+
+Sample of mean RT per word:
+   item  zone      word     mean_RT
+0     1     1        If  578.964286
+1     1     2       you  369.011905
+2     1     3      were  368.183908
+3     1     4        to  344.318182
+4     1     5   journey  354.639535
+5     1     6        to  349.674157
+6     1     7       the  376.370787
+7     1     8     North  327.310345
+8     1     9        of  365.494382
+9     1    10  England,  344.931034
+
+TASK 2: Adding word length
+Word length range: 1 to 23 characters
+
+TASK 3: Merging with frequency data
+Successfully merged 32342 records with frequency data
+Frequency range: 0 to 12000289422
+Log frequency range: 0.00 to 10.08
+
+TASK 4: Plotting word length vs mean RT
+Plot saved as 'word_length_vs_rt.png'
+TASK 5: Plotting word frequency vs mean RT
+Plot saved as 'word_frequency_vs_rt.png'
+TASK 6: Computing Pearson Correlations
+
+1. Word Length vs Log Frequency:
+   Pearson's r = -0.5937
+   p-value = 0.0000e+00
+   Interpretation: Significant correlation
+
+2. Word Length vs Mean RT:
+   Pearson's r = 0.2812
+   p-value = 0.0000e+00
+   Interpretation: Significant correlation
+
+3. Log Frequency vs Mean RT:
+   Pearson's r = -0.1795
+   p-value = 2.8015e-232
+   Interpretation: Significant correlation
+Creating comprehensive visualization...
+Comprehensive plot saved as 'comprehensive_analysis.png'
+SUMMARY STATISTICS
+
+Descriptive Statistics:
+        word_length          freq      log_freq       mean_RT
+count  32342.000000  3.234200e+04  32342.000000  32342.000000
+mean       4.708243  1.708309e+09      7.971048    339.305649
+std        2.481302  3.167705e+09      1.462176     44.137504
+min        1.000000  0.000000e+00      0.000000    256.863014
+25%        3.000000  9.225196e+06      6.964976    311.681818
+50%        4.000000  1.344797e+08      8.128657    330.586957
+75%        6.000000  1.140173e+09      9.056971    356.310811
+max       23.000000  1.200029e+10     10.079192    873.114286
