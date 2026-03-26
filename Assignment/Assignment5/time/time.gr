@@ -1,0 +1,15 @@
+1	S	NP VP
+0.25	NP	N N
+0.4	NP	Det N
+0.35	NP	N
+0.6	VP	V NP
+0.4	VP	V ADVP
+1	ADVP	ADV NP
+1	Det	a
+1	Det	an
+0.4	N	time
+0.2	N	flies
+0.4	N	arrow
+0.5	V	flies
+0.5	V	like
+1	ADV	like
