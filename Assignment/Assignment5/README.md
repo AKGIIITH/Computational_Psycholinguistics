@@ -75,16 +75,63 @@ Rules:
 
 ## Output Format
 
-For each sentence the program prints:
+For each sentence, the program prints one or more parse trees in the following format:
 
-1. **The Earley Chart** — every column (Chart[0] … Chart[n]), each showing  
-   `[done] [i,j]  LHS -> matched • remaining   logp=…`  
-   ✓ marks complete items (dot at end of rule).
+### Pretty-Printed S-Expression Parse Tree
 
-2. **Parse Trees** — every distinct parse tree found, with:
-   - `Probability` = exp(sum of log rule probabilities)
-   - `Log-prob`    = sum of log(rule_prob) for every rule in the tree
-   - Bracketed tree in `(LHS child1 child2 …)` notation
+Each parse tree is displayed as an indented S-expression with proper alignment:
+
+```
+(ROOT
+  (S
+    (NP
+      (NP
+        (NP
+          (Det every)
+          (Noun sandwich))
+        (PP
+          (Prep with)
+          (NP
+            (Det a)
+            (Noun pickle))))
+      (PP
+        (Prep on)
+        (NP
+          (Det the)
+          (Noun floor))))
+    (VP
+      (Verb wanted)
+      (NP
+        (Det a)
+        (Noun president)))))
+```
+
+### Cost (Log-Probability)
+
+Immediately following each tree is its **base-2 cost**:
+```
+12.5
+```
+
+This represents `-log₂(probability)` — lower values are better (higher probability).
+
+### Multiple Parse Trees
+
+If a sentence is ambiguous (multiple valid parses), all trees are printed, sorted by cost (best first):
+
+```
+(S (NP N N) (VP V NP))
+0.415
+(S (NP D N) (VP V NP))
+2.107
+```
+
+### No Parse Found
+
+If no valid parse exists:
+```
+NONE
+```
 
 ---
 
@@ -96,23 +143,18 @@ Every chart entry `chart[j][(ridx, dot, origin)]` stores two things:
 
 ```python
 {
-    'w':     best_log_probability,   # Viterbi weight
-    'backs': [back1, back2, ...]     # ALL backpointers (all derivations)
+    'cost':    best_base2_cost,      # Viterbi weight (lowest cost = best)
+    'backs':   [back1, back2, ...]   # ALL backpointers (all derivations)
 }
 ```
 
-**When a new item is first inserted** its log-weight and a single backpointer
-are stored.
+**When a new item is first inserted** its cost and a single backpointer are stored.
 
-**When the same item arrives again via a different derivation** two things
-happen independently:
-- If the new log-weight is higher → `entry['w']` is updated (Viterbi update).
-- The new backpointer is appended to `entry['backs']` if it is not already
-  present. This keeps every distinct derivation for exhaustive tree extraction.
+**When the same item arrives again via a different derivation** two things happen independently:
+- If the new cost is lower → `entry['cost']` is updated (Viterbi update).
+- The new backpointer is appended to `entry['backs']` if it is not already present. This keeps every distinct derivation for exhaustive tree extraction.
 
-This means the `w` field always holds the weight of the *best* derivation seen
-so far, while `backs` retains *all* derivations so every parse tree can be
-enumerated in the post-parse step.
+This means the `cost` field always holds the weight of the *best* derivation seen so far, while `backs` retains *all* derivations so every parse tree can be enumerated in the post-parse step.
 
 ### Efficiency — O(n²) space and O(n³) time
 
@@ -127,30 +169,20 @@ So each column holds at most O(|G| · n) distinct items → total O(n²) items.
 
 **O(n³) time**  
 The three operations:
-- **PREDICT**: For each item at column j that expects non-terminal Y, add
-  all rules for Y. O(|G|) work per item, dominated by other steps.
+- **PREDICT**: For each item at column j that expects non-terminal Y, add all rules for Y. O(|G|) work per item, dominated by other steps.
 - **SCAN**: O(1) per item — just add one item to the next column.
-- **COMPLETE**: For each complete item `(Y → γ •, i, j)`, scan `chart[i]`
-  for items waiting for Y. `chart[i]` has O(|G| · i) ≤ O(|G| · n) items.
-  Over all (i, j) pairs — O(n²) pairs — this gives O(n³ |G|) = **O(n³)**.
+- **COMPLETE**: For each complete item `(Y → γ •, i, j)`, scan `chart[i]` for items waiting for Y. `chart[i]` has O(|G| · i) ≤ O(|G| · n) items. Over all (i, j) pairs — O(n²) pairs — this gives O(n³ |G|) = **O(n³)**.
 
 **O(1) push (including duplicate check)**  
-`chart[col]` is a Python `dict`. Both `key not in chart[col]` (duplicate
-check) and `chart[col][key] = …` (insert) run in **O(1) amortised** time
-because Python dicts use hash tables.
+`chart[col]` is a Python `dict`. Both `key not in chart[col]` (duplicate check) and `chart[col][key] = …` (insert) run in **O(1) amortised** time because Python dicts use hash tables.
 
-Without this O(1) check, the same item could be added to `agenda[col]`
-multiple times. Each re-processed item triggers the COMPLETE loop again,
-potentially adding more duplicates, leading to worst-case exponential blowup.
-The dict-based deduplication ensures each item is *processed* at most once.
+Without this O(1) check, the same item could be added to `agenda[col]` multiple times. Each re-processed item triggers the COMPLETE loop again, potentially adding more duplicates, leading to worst-case exponential blowup. The dict-based deduplication ensures each item is *processed* at most once.
 
 ---
 
 ## Q3 — Grammar Design for PP-Attachment Ambiguity
 
-The sentence *"the man shot the soldier with a gun"* is structurally
-ambiguous. Two parse trees arise depending on where the PP *"with a gun"*
-attaches:
+The sentence *"the man shot the soldier with a gun"* is structurally ambiguous. Two parse trees arise depending on where the PP *"with a gun"* attaches:
 
 **Parse 1 — NP attachment** (the soldier *had* a gun):
 ```
@@ -172,8 +204,7 @@ Rule used: `NP  DT N PP`  (PP inside the object NP)
 ```
 Rule used: `VP  V NP PP`  (PP inside the VP)
 
-Both trees have equal probability (0.000122) under the symmetric grammar
-provided because `P(NP→DT N PP) = P(VP→V NP PP) = 0.5`.
+Both trees have equal probability (0.000122) under the symmetric grammar provided because `P(NP→DT N PP) = P(VP→V NP PP) = 0.5`.
 
 ---
 
@@ -185,13 +216,13 @@ For *"time flies like an arrow"* the two parses and their probabilities:
 `= P(S  NP VP) × P(NP  N N) × P(N  time) × P(N  flies)`  
 `× P(VP  V NP) × P(V  like) × P(NP  D N) × P(D  an) × P(N  arrow)`  
 `= 1 × 0.25 × 0.4 × 0.2 × 0.6 × 0.5 × 0.4 × 1 × 0.4`  
-`= **0.00096**`
+`= **0.00096**` → cost = **10.04** bits
 
 **Tree 2**: `[time]_NP  [flies [like [an arrow]_NP]_ADVP]_VP`  
 `= P(S  NP VP) × P(NP  N) × P(N  time)`  
 `× P(VP  V ADVP) × P(V  flies) × P(ADVP  ADV NP)`  
 `× P(ADV  like) × P(NP  D N) × P(D  an) × P(N  arrow)`  
 `= 1 × 0.35 × 0.4 × 0.4 × 0.5 × 1 × 1 × 0.4 × 1 × 0.4`  
-`= **0.00448**`
+`= **0.00448**` → cost = **7.80** bits
 
-Tree 2 is ~4.67× more probable under this grammar.
+Tree 2 is ~4.67× more probable under this grammar (lower cost = better parse).
