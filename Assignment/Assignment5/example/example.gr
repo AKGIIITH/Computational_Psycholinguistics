@@ -1,0 +1,16 @@
+1.0     ROOT    S
+1.0     S       NP VP
+0.4     NP      NP PP
+0.6     NP      Det Noun
+1.0     VP      Verb NP
+1.0     PP      Prep NP
+0.34    Det     every
+0.33    Det     a
+0.33    Det     the
+0.25    Noun    sandwich
+0.25    Noun    pickle
+0.25    Noun    floor
+0.25    Noun    president
+0.5     Prep    with
+0.5     Prep    on
+1.0     Verb    wanted

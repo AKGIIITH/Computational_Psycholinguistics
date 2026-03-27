@@ -1,135 +1,18 @@
-  Sentence: the man shot the soldier with a gun
-
-========================================================================
-  EARLEY CHART
-========================================================================
-
-  ── Chart[0]  (before reading any word) ───────────────
-     [0,0]  S -> • NP VP                                  logp=  0.0000
-     [0,0]  NP -> • DT N                                  logp= -0.6931
-     [0,0]  NP -> • DT N PP                               logp= -0.6931
-     [0,0]  DT -> • the                                   logp= -0.6931
-     [0,0]  DT -> • a                                     logp= -0.6931
-
-  ── Chart[1]  (after reading 'the') ───────────────────
-  ✓  [0,1]  DT -> the •                                   logp= -0.6931
-     [0,1]  NP -> DT • N                                  logp= -1.3863
-     [0,1]  NP -> DT • N PP                               logp= -1.3863
-     [1,1]  N -> • man                                    logp= -1.3863
-     [1,1]  N -> • soldier                                logp= -1.3863
-     [1,1]  N -> • gun                                    logp= -1.3863
-     [1,1]  N -> • arrow                                  logp= -1.3863
-
-  ── Chart[2]  (after reading 'man') ───────────────────
-  ✓  [1,2]  N -> man •                                    logp= -1.3863
-  ✓  [0,2]  NP -> DT N •                                  logp= -2.7726
-     [0,2]  NP -> DT N • PP                               logp= -2.7726
-     [0,2]  S -> NP • VP                                  logp= -2.7726
-     [2,2]  PP -> • P NP                                  logp=  0.0000
-     [2,2]  VP -> • V NP                                  logp= -0.6931
-     [2,2]  VP -> • V NP PP                               logp= -0.6931
-     [2,2]  P -> • with                                   logp=  0.0000
-     [2,2]  V -> • shot                                   logp=  0.0000
-
-  ── Chart[3]  (after reading 'shot') ──────────────────
-  ✓  [2,3]  V -> shot •                                   logp=  0.0000
-     [2,3]  VP -> V • NP                                  logp= -0.6931
-     [2,3]  VP -> V • NP PP                               logp= -0.6931
-     [3,3]  NP -> • DT N                                  logp= -0.6931
-     [3,3]  NP -> • DT N PP                               logp= -0.6931
-     [3,3]  DT -> • the                                   logp= -0.6931
-     [3,3]  DT -> • a                                     logp= -0.6931
-
-  ── Chart[4]  (after reading 'the') ───────────────────
-  ✓  [3,4]  DT -> the •                                   logp= -0.6931
-     [3,4]  NP -> DT • N                                  logp= -1.3863
-     [3,4]  NP -> DT • N PP                               logp= -1.3863
-     [4,4]  N -> • man                                    logp= -1.3863
-     [4,4]  N -> • soldier                                logp= -1.3863
-     [4,4]  N -> • gun                                    logp= -1.3863
-     [4,4]  N -> • arrow                                  logp= -1.3863
-
-  ── Chart[5]  (after reading 'soldier') ───────────────
-  ✓  [4,5]  N -> soldier •                                logp= -1.3863
-  ✓  [3,5]  NP -> DT N •                                  logp= -2.7726
-     [3,5]  NP -> DT N • PP                               logp= -2.7726
-  ✓  [2,5]  VP -> V NP •                                  logp= -3.4657
-     [2,5]  VP -> V NP • PP                               logp= -3.4657
-     [5,5]  PP -> • P NP                                  logp=  0.0000
-  ✓  [0,5]  S -> NP VP •                                  logp= -6.2383
-     [5,5]  P -> • with                                   logp=  0.0000
-
-  ── Chart[6]  (after reading 'with') ──────────────────
-  ✓  [5,6]  P -> with •                                   logp=  0.0000
-     [5,6]  PP -> P • NP                                  logp=  0.0000
-     [6,6]  NP -> • DT N                                  logp= -0.6931
-     [6,6]  NP -> • DT N PP                               logp= -0.6931
-     [6,6]  DT -> • the                                   logp= -0.6931
-     [6,6]  DT -> • a                                     logp= -0.6931
-
-  ── Chart[7]  (after reading 'a') ─────────────────────
-  ✓  [6,7]  DT -> a •                                     logp= -0.6931
-     [6,7]  NP -> DT • N                                  logp= -1.3863
-     [6,7]  NP -> DT • N PP                               logp= -1.3863
-     [7,7]  N -> • man                                    logp= -1.3863
-     [7,7]  N -> • soldier                                logp= -1.3863
-     [7,7]  N -> • gun                                    logp= -1.3863
-     [7,7]  N -> • arrow                                  logp= -1.3863
-
-  ── Chart[8]  (after reading 'gun') ───────────────────
-  ✓  [7,8]  N -> gun •                                    logp= -1.3863
-  ✓  [6,8]  NP -> DT N •                                  logp= -2.7726
-     [6,8]  NP -> DT N • PP                               logp= -2.7726
-  ✓  [5,8]  PP -> P NP •                                  logp= -2.7726
-     [8,8]  PP -> • P NP                                  logp=  0.0000
-  ✓  [3,8]  NP -> DT N PP •                               logp= -5.5452
-  ✓  [2,8]  VP -> V NP PP •                               logp= -6.2383
-     [8,8]  P -> • with                                   logp=  0.0000
-  ✓  [2,8]  VP -> V NP •                                  logp= -6.2383
-     [2,8]  VP -> V NP • PP                               logp= -6.2383
-  ✓  [0,8]  S -> NP VP •                                  logp= -9.0109
-
-========================================================================
-  PARSE TREES
-========================================================================
-
-  ── Tree 1 ────────────────────────────────────
-  Probability : 0.0001220711
-  Log-prob    : -9.010913
-
-    (S
-      (NP
-        (DT the)
-        (N man))
-      (VP
-        (V shot)
-        (NP
-          (DT the)
-          (N soldier))
-        (PP
-          (P with)
-          (NP
-            (DT a)
-            (N gun)))))
-
-  ── Tree 2 ────────────────────────────────────
-  Probability : 0.0001220711
-  Log-prob    : -9.010913
-
-    (S
-      (NP
-        (DT the)
-        (N man))
-      (VP
-        (V shot)
-        (NP
-          (DT the)
-          (N soldier)
-          (PP
-            (P with)
-            (NP
-              (DT a)
-              (N gun))))))
-
-  Total: 2 parse tree(s) found.
-
+(S (NP (DT the)
+       (N man))
+   (VP (V shot)
+       (NP (DT the)
+           (N soldier))
+       (PP (P with)
+           (NP (DT a)
+               (N gun)))))
+13.0
+(S (NP (DT the)
+       (N man))
+   (VP (V shot)
+       (NP (DT the)
+           (N soldier)
+           (PP (P with)
+               (NP (DT a)
+                   (N gun))))))
+13.0
