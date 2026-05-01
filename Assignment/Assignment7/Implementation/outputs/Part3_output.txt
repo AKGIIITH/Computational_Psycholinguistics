@@ -1,0 +1,34 @@
+Part 3: Word Length & Information Content Analysis
+
+Loading and cleaning datasets...
+Total words (tokens) after cleaning: 980,598
+Unique words (types): 39,716
+
+Task 1 & 2: Word Length Distribution
+Number of unique words at each length (Top 10):
+  Length 1 letters: 3 words
+  Length 2 letters: 197 words
+  Length 3 letters: 897 words
+  Length 4 letters: 2,389 words
+  Length 5 letters: 4,072 words
+  Length 6 letters: 5,571 words
+  Length 7 letters: 6,440 words
+  Length 8 letters: 5,889 words
+  Length 9 letters: 4,962 words
+  Length 10 letters: 3,754 words
+  ...
+
+Task 2.1: Hypothesis Testing (Information Content vs Frequency)
+Model A (Predictor: Raw Frequency): R^2 = 0.0037
+Model B (Predictor: Information Content): R^2 = 0.0432
+
+Task 2.2: Shortest Words in Dataset
+The shortest words are 1 letter(s) long:
+  'a' (Frequency: 22,678)
+  'i' (Frequency: 6,376)
+  'o' (Frequency: 167)
+
+Task 2.3: Pearson Correlation
+Pearson's coefficient of correlation (Length vs Frequency): -0.0612
+
+Generating scatter plots (Tasks 2.4, 2.5, 2.6)...

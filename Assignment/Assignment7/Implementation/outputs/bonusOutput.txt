@@ -1,0 +1,59 @@
+python3 bonus.py
+Loading BNC corpus...
+
+Scoring Baseline Unigram (SRILM)...
+
+Scoring Neural Model (GPT-2)...
+  Loading GPT-2 model & tokenizer... (this may take a moment)
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+tokenizer_config.json: 100%|███████████████████████████████████████████████| 26.0/26.0 [00:00<00:00, 181kB/s]
+vocab.json: 1.04MB [00:00, 1.99MB/s]
+merges.txt: 456kB [00:00, 4.10MB/s]
+tokenizer.json: 1.36MB [00:00, 16.2MB/s]
+config.json: 100%|██████████████████████████████████████████████████████████| 665/665 [00:00<00:00, 7.24MB/s]
+model.safetensors: 100%|██████████████████████████████████████████████████| 548M/548M [00:43<00:00, 12.7MB/s]
+Loading weights: 100%|██████████████████████████████████████████████████| 148/148 [00:00<00:00, 16742.37it/s]
+generation_config.json: 100%|███████████████████████████████████████████████| 124/124 [00:00<00:00, 1.37MB/s]
+  Scoring sentences with GPT-2...
+[transformers] `loss_type=None` was set in the config but it is unrecognized. Using the default loss: `ForCausalLMLoss`.
+    Processed 1000/5250 sentences...
+    Processed 2000/5250 sentences...
+    Processed 3000/5250 sentences...
+    Processed 4000/5250 sentences...
+    Processed 5000/5250 sentences...
+
+================================================================================
+PART 1: COMPUTED NEURAL MODEL SCORES (Sample of first 5 sentences)
+================================================================================
+Sent #   | Model      | Total Log-Prob  | Avg Log-Prob    | SLOR      
+--------------------------------------------------------------------------------
+Sentence 1: 'We've still got the Dower House , and Li...' (Length: 12)
+         | Unigram    | -34.9083        | -2.9090         | N/A       
+         | GPT-2      | -48.4056        | -4.0338         | -13.4973  
+--------------------------------------------------------------------------------
+Sentence 2: 'My first real friend was probably a boy ...' (Length: 10)
+         | Unigram    | -36.2968        | -3.6297         | N/A       
+         | GPT-2      | -21.1005        | -2.1100         | 15.1963   
+--------------------------------------------------------------------------------
+Sentence 3: 'She was wearing denim overalls and carry...' (Length: 11)
+         | Unigram    | -36.1917        | -3.2902         | N/A       
+         | GPT-2      | -27.4692        | -2.4972         | 8.7225    
+--------------------------------------------------------------------------------
+Sentence 4: 'In the next year he had custody of Roche...' (Length: 10)
+         | Unigram    | -25.5883        | -2.5588         | N/A       
+         | GPT-2      | -26.4166        | -2.6417         | -0.8283   
+--------------------------------------------------------------------------------
+Sentence 5: 'BOOKING is essential for a cycle ride ar...' (Length: 22)
+         | Unigram    | -67.0521        | -3.0478         | N/A       
+         | GPT-2      | -64.9749        | -2.9534         | 2.0772    
+--------------------------------------------------------------------------------
+
+==================================================
+PART 2: SPEARMAN CORRELATION RESULTS
+==================================================
+Unigram (Total Log-Prob)  | ρ:  0.1153 | p-value: 5.2445e-17
+GPT-2 (Total Log-Prob)    | ρ:  0.3553 | p-value: 5.4032e-156
+Unigram (Avg Log-Prob)    | ρ:  0.0208 | p-value: 1.3269e-01
+GPT-2 (Avg Log-Prob)      | ρ:  0.3920 | p-value: 2.1626e-192
+GPT-2 (SLOR)              | ρ:  0.3115 | p-value: 1.7131e-118
+

@@ -1,0 +1,47 @@
+Loading BNC corpus...
+Scoring Unigram...
+Scoring Bigram...
+Scoring Trigram...
+
+================================================================================
+PART 1: COMPUTED MODEL SCORES (Sample of first 5 sentences)
+================================================================================
+Sent #   | Model      | Total Log-Prob  | Avg Log-Prob    | SLOR      
+--------------------------------------------------------------------------------
+Sentence 1: 'We've still got the Dower House , and Li...' (Length: 12)
+         | Unigram    | -34.9083        | -2.9090         | N/A       
+         | Bigram     | -34.5569        | -2.8797         | 0.3514    
+         | Trigram    | -34.4223        | -2.8685         | 0.4860    
+--------------------------------------------------------------------------------
+Sentence 2: 'My first real friend was probably a boy ...' (Length: 10)
+         | Unigram    | -36.2968        | -3.6297         | N/A       
+         | Bigram     | -33.4267        | -3.3427         | 2.8701    
+         | Trigram    | -33.1628        | -3.3163         | 3.1340    
+--------------------------------------------------------------------------------
+Sentence 3: 'She was wearing denim overalls and carry...' (Length: 11)
+         | Unigram    | -36.1917        | -3.2902         | N/A       
+         | Bigram     | -27.2530        | -2.4775         | 8.9387    
+         | Trigram    | -25.5275        | -2.3207         | 10.6642   
+--------------------------------------------------------------------------------
+Sentence 4: 'In the next year he had custody of Roche...' (Length: 10)
+         | Unigram    | -25.5883        | -2.5588         | N/A       
+         | Bigram     | -18.5773        | -1.8577         | 7.0110    
+         | Trigram    | -18.3618        | -1.8362         | 7.2265    
+--------------------------------------------------------------------------------
+Sentence 5: 'BOOKING is essential for a cycle ride ar...' (Length: 22)
+         | Unigram    | -67.0521        | -3.0478         | N/A       
+         | Bigram     | -56.9212        | -2.5873         | 10.1309   
+         | Trigram    | -57.3185        | -2.6054         | 9.7336    
+--------------------------------------------------------------------------------
+
+==================================================
+PART 2: SPEARMAN CORRELATION RESULTS
+==================================================
+Unigram (Total Log-Prob)  | ρ:  0.1153 | p-value: 5.2445e-17
+Bigram (Total Log-Prob)   | ρ:  0.1369 | p-value: 2.1192e-23
+Trigram (Total Log-Prob)  | ρ:  0.1398 | p-value: 2.5163e-24
+Unigram (Avg Log-Prob)    | ρ:  0.0208 | p-value: 1.3269e-01
+Bigram (Avg Log-Prob)     | ρ:  0.0733 | p-value: 1.0424e-07
+Trigram (Avg Log-Prob)    | ρ:  0.0783 | p-value: 1.3301e-08
+Bigram (SLOR)             | ρ:  0.0444 | p-value: 1.3032e-03
+Trigram (SLOR)            | ρ:  0.0530 | p-value: 1.2267e-04
